@@ -1,5 +1,8 @@
 package com.chengzi.framework.configs;
 
+import com.alibaba.fastjson.parser.ParserConfig;
+import com.chengzi.framework.serializer.FastJsonRedisSerializer;
+import com.chengzi.framework.serializer.StringRedisSerializer;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
@@ -13,6 +16,7 @@ import org.springframework.data.redis.connection.jedis.JedisClientConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisConnection;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.lang.Nullable;
 
 import javax.net.ssl.HostnameVerifier;
@@ -93,11 +97,19 @@ public class StandaloneRedisConfig {
         //jedisPoolConfig.setSoftMinEvictableIdleTimeMillis();
     }
 
+    /**
+     * 创建jedis客户配置
+     * @return
+     */
     @Bean
     public JedisClientConfiguration jedisClientConfiguration(){
         return JedisClientConfiguration.builder().build();
     }
 
+    /**
+     * 配置redis单例连接服务端信息
+     * @return
+     */
     @Bean
     public RedisStandaloneConfiguration redisStandaloneConfiguration(){
         RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration();
@@ -107,6 +119,12 @@ public class StandaloneRedisConfig {
         return redisStandaloneConfiguration;
     }
 
+    /**
+     * 创建jedis连接工厂
+     * @param redisStandaloneConfiguration
+     * @param jedisClientConfiguration
+     * @return
+     */
     @Bean
     public JedisConnectionFactory jedisConnectionFactory(RedisStandaloneConfiguration redisStandaloneConfiguration, JedisClientConfiguration jedisClientConfiguration){
         JedisConnectionFactory jedisConnectionFactory = new JedisConnectionFactory(redisStandaloneConfiguration,jedisClientConfiguration);
@@ -116,10 +134,27 @@ public class StandaloneRedisConfig {
         return jedisConnectionFactory;
     }
 
-    @Bean
+    /**
+     * 创建一个redis模版
+     * @param jedisConnectionFactory
+     * @return RedisTemplate<String,Object> redisTemplate
+     */
+    @Bean(name = "redisTemplate1")
     public RedisTemplate<String,Object> redisTemplate(JedisConnectionFactory jedisConnectionFactory){
         RedisTemplate<String,Object > redisTemplate = new RedisTemplate<String,Object>();
         redisTemplate.setConnectionFactory(jedisConnectionFactory);
+        redisTemplate.setEnableDefaultSerializer(true);
+
+        FastJsonRedisSerializer<Object> fastJsonRedisSerializer = new FastJsonRedisSerializer<>(Object.class);
+        ParserConfig.getGlobalInstance().addAccept("com.chengz.");
+
+        redisTemplate.setValueSerializer(fastJsonRedisSerializer);
+        redisTemplate.setHashValueSerializer(fastJsonRedisSerializer);
+
+        redisTemplate.setKeySerializer(new StringRedisSerializer());
+        redisTemplate.setHashKeySerializer(new StringRedisSerializer());
+
+        redisTemplate.afterPropertiesSet();
 
         return redisTemplate;
     }
