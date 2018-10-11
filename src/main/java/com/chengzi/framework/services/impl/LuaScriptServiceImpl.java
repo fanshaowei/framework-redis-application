@@ -46,7 +46,7 @@ public class LuaScriptServiceImpl implements LuaScriptService{
         /**
          * 用Mpa设置Lua的ARGV[1]
          */
-        Map<String,Object> argvMap = new HashMap<String,Object>();
+        Map<String,Object> argvMap = new HashMap<String,Object>(10);
         argvMap.put("expire",10000);
         argvMap.put("times",10);
 

@@ -15,17 +15,17 @@ public class RedisUtil {
     @Autowired
     private RedisTemplate<String,Object> redisTemplate;
 
-    public void str_Set(String key, Object value, int expire){
+    public void strSet(String key, Object value, int expire){
         Optional.ofNullable(expire).ifPresent(exp -> redisTemplate.opsForValue().set(key, value,expire));
 
         redisTemplate.opsForValue().set(key, value);
     }
 
-    public void str_get(String key){
+    public void strGet(String key){
         redisTemplate.opsForValue().get(key);
     }
 
-    public  String str_get_ttl(String key){
+    public  String strGetTtl(String key){
         String ttl = Optional.ofNullable(key).orElse(redisTemplate.opsForValue().getOperations().getExpire(key, TimeUnit.SECONDS).toString());
 
         return ttl;

@@ -18,7 +18,7 @@ public class KryoRedisSerializer<T> implements RedisSerializer {
     Logger logger = LoggerFactory.getLogger(KryoRedisSerializer.class);
 
     public static final byte[] EMPTY_BYTE_ARRAY = new byte[0];
-    private static final ThreadLocal<Kryo> kryos = ThreadLocal.withInitial(Kryo::new);
+    private static final ThreadLocal<Kryo> KRYOS = ThreadLocal.withInitial(Kryo::new);
     private Class<T> clazz;
 
     public KryoRedisSerializer(Class<T> clazz){
@@ -30,7 +30,7 @@ public class KryoRedisSerializer<T> implements RedisSerializer {
         if (o == null)
             return EMPTY_BYTE_ARRAY;
 
-        Kryo kryo = kryos.get();
+        Kryo kryo = KRYOS.get();
         kryo.setReferences(false);
         kryo.register(clazz);
 
@@ -47,7 +47,7 @@ public class KryoRedisSerializer<T> implements RedisSerializer {
         if(bytes == null || bytes.length <=0)
             return null;
 
-        Kryo kryo = kryos.get();
+        Kryo kryo = KRYOS.get();
         kryo.setReferences(false);
         kryo.register(clazz);
 
